@@ -1,81 +1,46 @@
+// src/main/java/com/sistemi_inf/AgriTech/model/Utente.java
 package com.sistemi_inf.AgriTech.model;
 
 import jakarta.persistence.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Entity
-public class Utente implements UserDetails {
+@Table(name = "utenti")
+public class Utente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nome;
-    private String cognome;
+    @Column(unique = true, nullable = false)
     private String email;
+
+    @Column(nullable = false)
     private String password;
 
+    private String nome;
+    private String cognome;
+    private String telefono;
+
     @Enumerated(EnumType.STRING)
-    private Ruolo ruolo; // CLIENT o ADMIN
+    private Ruolo ruolo = Ruolo.ROLE_CLIENTE;
 
-    @OneToOne(mappedBy = "utente", cascade = CascadeType.ALL)
-    private Carrello carrello;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "utente")
-    private List<Ordine> ordini;
-
-    // --- Getters e Setters ---
+    // getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
-
-    public String getCognome() { return cognome; }
-    public void setCognome(String cognome) { this.cognome = cognome; }
-
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
-
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+    public String getCognome() { return cognome; }
+    public void setCognome(String cognome) { this.cognome = cognome; }
+    public String getTelefono() { return telefono; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
     public Ruolo getRuolo() { return ruolo; }
     public void setRuolo(Ruolo ruolo) { this.ruolo = ruolo; }
-
-    public Carrello getCarrello() { return carrello; }
-    public void setCarrello(Carrello carrello) { this.carrello = carrello; }
-
-    public List<Ordine> getOrdini() { return ordini; }
-    public void setOrdini(List<Ordine> ordini) { this.ordini = ordini; }
-
-    // --- UserDetails ---
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_" + ruolo.name())
-        );
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() { return true; }
-
-    @Override
-    public boolean isAccountNonLocked() { return true; }
-
-    @Override
-    public boolean isCredentialsNonExpired() { return true; }
-
-    @Override
-    public boolean isEnabled() { return true; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
