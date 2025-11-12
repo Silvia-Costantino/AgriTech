@@ -1,3 +1,4 @@
+// src/main/java/com/sistemi_inf/AgriTech/service/AuthService.java
 package com.sistemi_inf.AgriTech.service;
 
 import com.sistemi_inf.AgriTech.dto.AuthRequest;
@@ -27,11 +28,13 @@ public class AuthService {
         this.jwtUtil = jwtUtil;
     }
 
-    // REGISTRAZIONE CLIENTE
+    // ─────────────────────────────────────────────
+    // 🧩 REGISTRAZIONE CLIENTE
+    // ─────────────────────────────────────────────
     public AuthResponse register(RegisterRequest request) {
         Optional<Utente> existingUser = utenteRepository.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {
-            throw new RuntimeException("Email già registrata");
+            throw new IllegalArgumentException("Email già registrata");
         }
 
         Utente u = new Utente();
@@ -39,23 +42,28 @@ public class AuthService {
         u.setPassword(passwordEncoder.encode(request.getPassword()));
         u.setNome(request.getNome());
         u.setCognome(request.getCognome());
-        u.setRuolo(Ruolo.ROLE_CLIENTE); // sempre CLIENTE per registrazione front-end
+        u.setRuolo(Ruolo.CLIENTE); // ✅ coerente con nuovo enum
         utenteRepository.save(u);
 
-        String token = jwtUtil.generateToken(u.getEmail()); // genera token con username
-        return new AuthResponse(token);
+        // ✅ Genera token JWT includendo email e ruolo
+        String token = jwtUtil.generateToken(u.getEmail());
+
+        return new AuthResponse(token, u.getRuolo().name(), u.getEmail());
     }
 
-    // LOGIN CLIENTE / ADMIN
+    // ─────────────────────────────────────────────
+    // 🔐 LOGIN CLIENTE / DIPENDENTE / SOCIO
+    // ─────────────────────────────────────────────
     public AuthResponse login(AuthRequest request) {
         Utente u = utenteRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+                .orElseThrow(() -> new IllegalArgumentException("Utente non trovato"));
 
         if (!passwordEncoder.matches(request.getPassword(), u.getPassword())) {
-            throw new RuntimeException("Credenziali non valide");
+            throw new IllegalArgumentException("Credenziali non valide");
         }
 
-        String token = jwtUtil.generateToken(u.getEmail()); // genera token con username
-        return new AuthResponse(token);
+        String token = jwtUtil.generateToken(u.getEmail());
+
+        return new AuthResponse(token, u.getRuolo().name(), u.getEmail());
     }
 }

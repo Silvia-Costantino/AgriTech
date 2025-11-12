@@ -1,22 +1,48 @@
-import { Injectable, inject } from '@angular/core';
+// src/app/services/auth/auth.ts
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, tap } from 'rxjs';
+import { BehaviorSubject, tap, Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { Utente } from '../../models/utente';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private user$ = new BehaviorSubject<Utente | null>(null);
+  private platformId = inject(PLATFORM_ID);
+
+  // 🔁 Utente corrente esposto in modo pubblico e osservabile
+  private userSubject = new BehaviorSubject<Utente | null>(null);
+  public user$: Observable<Utente | null> = this.userSubject.asObservable();
+
   private readonly api = 'http://localhost:8080/api/auth';
   private readonly tokenKey = 'jwt_agritech';
+
+  private get storage() {
+    return isPlatformBrowser(this.platformId) ? globalThis.localStorage : null;
+  }
+
+  constructor() {
+    // 🔹 Al caricamento, se c’è un token valido, ricostruisce lo stato utente
+    const token = this.getToken();
+    if (token) {
+      const role = this.getRole();
+      this.userSubject.next({
+        id: 0,
+        nome: '',
+        cognome: '',
+        email: '',
+        ruolo: role as any
+      } as Utente);
+    }
+  }
 
   login(data: any) {
     return this.http.post<{ token: string; user: Utente }>(`${this.api}/login`, data).pipe(
       tap(res => {
-        localStorage.setItem(this.tokenKey, res.token);
-        this.user$.next(res.user);
+        this.storage?.setItem(this.tokenKey, res.token);
+        this.userSubject.next(res.user);
       })
     );
   }
@@ -26,23 +52,32 @@ export class AuthService {
   }
 
   logout() {
-    localStorage.removeItem(this.tokenKey);
-    this.user$.next(null);
+    this.storage?.removeItem(this.tokenKey);
+    this.userSubject.next(null);
     this.router.navigate(['/login']);
   }
 
-  getToken() { return localStorage.getItem(this.tokenKey); }
-
-  currentUser() { return this.user$.asObservable(); }
-
-  private parseJwt(token: string): any {
-    try { return JSON.parse(atob(token.split('.')[1])); } catch { return null; }
+  getToken(): string | null {
+    return this.storage?.getItem(this.tokenKey) ?? null;
   }
 
-  getRole(): 'SOCIO'|'DIPENDENTE'|'CLIENTE'|null {
+  /** Ritorna lo stream dell’utente corrente */
+  currentUser(): Observable<Utente | null> {
+    return this.user$;
+  }
+
+  private parseJwt(token: string): any {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch {
+      return null;
+    }
+  }
+
+  getRole(): 'SOCIO' | 'DIPENDENTE' | 'CLIENTE' | null {
     const t = this.getToken();
     if (!t) return null;
     const payload = this.parseJwt(t);
-    return payload?.role || payload?.roles?.[0] || null; // adatta alla tua claim
+    return payload?.role || payload?.roles?.[0] || null;
   }
 }

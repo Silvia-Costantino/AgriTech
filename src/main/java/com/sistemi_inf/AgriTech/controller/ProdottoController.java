@@ -3,14 +3,13 @@ package com.sistemi_inf.AgriTech.controller;
 
 import com.sistemi_inf.AgriTech.model.Prodotto;
 import com.sistemi_inf.AgriTech.service.ProdottoService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/prodotti")
+@CrossOrigin(origins = "http://localhost:4200")
 public class ProdottoController {
 
     private final ProdottoService prodottoService;
@@ -20,45 +19,27 @@ public class ProdottoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Prodotto>> listAll(@RequestParam(value = "marca", required = false) String marca) {
-        if (marca != null && !marca.isBlank()) {
-            return ResponseEntity.ok(prodottoService.findByMarca(marca));
-        }
-        return ResponseEntity.ok(prodottoService.findAll());
+    public List<Prodotto> getAll() {
+        return prodottoService.getAll();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Prodotto> get(@PathVariable Long id) {
-        return prodottoService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/search")
+    public List<Prodotto> search(@RequestParam String marca) {
+        return prodottoService.searchByMarca(marca);
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_SHOWROOM','ROLE_SOCIO')")
-    public ResponseEntity<Prodotto> create(@RequestBody Prodotto prodotto) {
-        return ResponseEntity.ok(prodottoService.save(prodotto));
+    public Prodotto add(@RequestBody Prodotto p) {
+        return prodottoService.save(p);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_SHOWROOM','ROLE_SOCIO')")
-    public ResponseEntity<Prodotto> update(@PathVariable Long id, @RequestBody Prodotto prodotto) {
-        return prodottoService.findById(id).map(existing -> {
-            existing.setNome(prodotto.getNome());
-            existing.setDescrizione(prodotto.getDescrizione());
-            existing.setMarca(prodotto.getMarca());
-            existing.setModello(prodotto.getModello());
-            existing.setPrezzo(prodotto.getPrezzo());
-            existing.setQuantitaDisponibile(prodotto.getQuantitaDisponibile());
-            existing.setStockMinimo(prodotto.getStockMinimo());
-            return ResponseEntity.ok(prodottoService.save(existing));
-        }).orElse(ResponseEntity.notFound().build());
+    public Prodotto update(@PathVariable Long id, @RequestBody Prodotto p) {
+        return prodottoService.update(id, p);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ROLE_SOCIO')")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        prodottoService.findById(id).ifPresent(p -> prodottoService.save(p)); // placeholder: implement deletion if desired
-        return ResponseEntity.noContent().build();
+    public void delete(@PathVariable Long id) {
+        prodottoService.delete(id);
     }
 }

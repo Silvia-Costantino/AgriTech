@@ -1,10 +1,14 @@
 package com.sistemi_inf.AgriTech.model;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
+
 public enum Ruolo {
-    ROLE_CLIENTE,
-    ROLE_SOCIO,
-    ROLE_SHOWROOM,
-    ROLE_VENDITE,
-    ROLE_MECCANICO,
-    ROLE_FRONTDESK
+    CLIENTE,
+    DIPENDENTE,
+    SOCIO;
+
+    public GrantedAuthority getGrantedAuthority() {
+        return new SimpleGrantedAuthority("ROLE_" + this.name());
+    }
 }

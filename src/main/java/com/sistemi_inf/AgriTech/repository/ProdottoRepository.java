@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ProdottoRepository extends JpaRepository<Prodotto, Long> {
     List<Prodotto> findByMarcaContainingIgnoreCase(String marca);
+    List<Prodotto> findByPrezzoBetween(java.math.BigDecimal min, java.math.BigDecimal max);
 }

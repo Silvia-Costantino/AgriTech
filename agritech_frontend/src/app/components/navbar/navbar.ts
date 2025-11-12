@@ -1,111 +1,107 @@
-import { Component, inject } from '@angular/core';
+// src/app/components/navbar/navbar.component.ts
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth/auth';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <nav class="navbar">
+    <nav class="navbar" *ngIf="showNavbar">
       <div class="nav-left">
-        <a routerLink="/home" class="logo">🌿 AgriTech</a>
-        <a routerLink="/catalogo" *ngIf="isLogged">Catalogo</a>
+        <a routerLink="/home" class="brand">
+          <span class="icon">🚜</span>
+          <div class="brand-text">
+            <strong>AgriTech</strong>
+            <small>Trattori e Soluzioni</small>
+          </div>
+        </a>
 
-        <!-- CLIENTE -->
-        <a routerLink="/carrello" *ngIf="role==='CLIENTE'">Carrello</a>
-        <a routerLink="/ordini" *ngIf="role==='CLIENTE'">Ordini</a>
-
-        <!-- DIPENDENTE -->
-        <a routerLink="/ordini" *ngIf="role==='DIPENDENTE'">Ordini</a>
-        <a routerLink="/officina" *ngIf="role==='DIPENDENTE'">Officina</a>
-
-        <!-- SOCIO -->
-        <a routerLink="/ordini" *ngIf="role==='SOCIO'">Ordini</a>
-        <a routerLink="/officina" *ngIf="role==='SOCIO'">Officina</a>
-        <a routerLink="/fornitori" *ngIf="role==='SOCIO'">Fornitori</a>
-        <a routerLink="/dipendenti" *ngIf="role==='SOCIO'">Dipendenti</a>
-        <a routerLink="/contabilita" *ngIf="role==='SOCIO'">Contabilità</a>
+        <div class="nav-links" *ngIf="isLogged">
+          <a routerLink="/catalogo">Catalogo</a>
+          <a routerLink="/carrello" *ngIf="role==='CLIENTE'">Carrello</a>
+          <a routerLink="/ordini" *ngIf="role==='CLIENTE' || role==='DIPENDENTE' || role==='SOCIO'">Ordini</a>
+          <a routerLink="/officina" *ngIf="role==='DIPENDENTE' || role==='SOCIO'">Officina</a>
+          <a routerLink="/fornitori" *ngIf="role==='SOCIO'">Fornitori</a>
+          <a routerLink="/dipendenti" *ngIf="role==='SOCIO'">Dipendenti</a>
+          <a routerLink="/contabilita" *ngIf="role==='SOCIO'">Contabilità</a>
+        </div>
       </div>
 
       <div class="nav-right">
         <ng-container *ngIf="isLogged; else guest">
-          <span class="user">{{userName}} ({{role}})</span>
-          <button (click)="logout()">Logout</button>
+          <div class="user-pill">
+            <span class="user-name">{{ userName || 'Account' }}</span>
+            <span class="role">{{ role }}</span>
+          </div>
+          <button (click)="logout()">Esci</button>
         </ng-container>
         <ng-template #guest>
-          <a routerLink="/login">Login</a>
-          <a routerLink="/register">Registrati</a>
+          <a routerLink="/login" class="ghost">Accedi</a>
+          <a routerLink="/register" class="cta">Registrati</a>
         </ng-template>
       </div>
     </nav>
   `,
   styles: [`
+    nav { display:block; }
     .navbar {
+      background: linear-gradient(110deg, #0e3f25 0%, #1f6c2e 55%, #2e9d37 100%);
+      color: #fdfdfc;
+      padding: 0.85rem clamp(1rem, 4vw, 2.5rem);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 24px;
-      background: #2e7d32;
-      color: white;
-      flex-wrap: wrap;
+      gap: 1.5rem;
+      box-shadow: 0 18px 30px rgba(14, 63, 37, 0.25);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
-    .logo {
-      font-weight: bold;
-      color: #fff;
-      margin-right: 16px;
-      text-decoration: none;
-      font-size: 1.2rem;
-    }
-    .nav-left a {
-      color: white;
-      text-decoration: none;
-      margin-right: 12px;
-      font-weight: 500;
-      transition: color .2s;
-    }
-    .nav-left a:hover { color: #c8e6c9; }
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .user { font-style: italic; }
-    button {
-      background: #fff;
-      color: #2e7d32;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-    button:hover { background: #c8e6c9; }
-    @media (max-width: 768px) {
-      .navbar { flex-direction: column; align-items: flex-start; }
-      .nav-left, .nav-right { margin-top: 8px; }
-    }
+    .nav-left { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+    .brand { display: inline-flex; align-items: center; gap: 0.65rem; text-decoration: none; color: inherit; }
+    .icon { font-size: 1.6rem; }
+    .brand-text strong { font-size: 1.15rem; letter-spacing: 0.05em; }
+    .brand-text small { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.28em; opacity: 0.8; }
+    .nav-links { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .nav-links a { color: rgba(255, 255, 255, 0.88); text-decoration: none; font-weight: 600; font-size: 0.95rem; padding: 0.45rem 0.75rem; border-radius: 999px; transition: 0.2s; }
+    .nav-links a:hover { background: rgba(255, 255, 255, 0.13); transform: translateY(-1px); }
+    .nav-right { display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; }
+    .user-pill { background: rgba(255,255,255,0.12); border-radius: 999px; padding: 0.45rem 1.1rem; display: flex; align-items: center; gap: 0.65rem; }
+    .role { background: rgba(241, 143, 28, 0.25); padding: 0.15rem 0.65rem; border-radius: 999px; font-size: 0.75rem; text-transform: uppercase; }
+    button, .ghost, .cta { border-radius: 999px; font-weight: 700; padding: 0.55rem 1.4rem; cursor: pointer; border: none; }
+    .ghost { color: #fff; border: 1px solid rgba(255,255,255,0.4); background: transparent; }
+    .cta { background: linear-gradient(120deg, #f18f1c 0%, #ffa630 65%, #ffbe54 100%); color: #0e3f25; }
   `]
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private router = inject(Router);
 
   role: string | null = null;
   userName: string | null = null;
   isLogged = false;
+  showNavbar = true;
+  private sub?: Subscription;
 
-  constructor() {
-    const token = this.auth.getToken();
-    this.isLogged = !!token;
-    this.role = this.auth.getRole();
-    const user = (this.auth as any).user$?.value || null;
-    if (user) this.userName = `${user.nome || ''} ${user.cognome || ''}`.trim();
+  ngOnInit() {
+    this.sub = this.auth.user$.subscribe(user => {
+      this.isLogged = !!user;
+      this.role = user?.ruolo || this.auth.getRole();
+      this.userName = user ? `${user.nome || ''} ${user.cognome || ''}`.trim() : null;
+      this.showNavbar = true;
+    });
   }
 
   logout() {
     this.auth.logout();
     this.router.navigate(['/login']);
+  }
+
+  ngOnDestroy() {
+    this.sub?.unsubscribe();
   }
 }

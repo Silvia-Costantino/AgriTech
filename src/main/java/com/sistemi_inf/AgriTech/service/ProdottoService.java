@@ -6,7 +6,6 @@ import com.sistemi_inf.AgriTech.repository.ProdottoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProdottoService {
@@ -17,13 +16,32 @@ public class ProdottoService {
         this.prodottoRepository = prodottoRepository;
     }
 
+    public List<Prodotto> getAll() {
+        return prodottoRepository.findAll();
+    }
+
+    public List<Prodotto> searchByMarca(String marca) {
+        return prodottoRepository.findByMarcaContainingIgnoreCase(marca);
+    }
+
     public Prodotto save(Prodotto p) {
         return prodottoRepository.save(p);
     }
 
-    public List<Prodotto> findAll() { return prodottoRepository.findAll(); }
+    public Prodotto update(Long id, Prodotto nuovo) {
+        return prodottoRepository.findById(id).map(prod -> {
+            prod.setNome(nuovo.getNome());
+            prod.setDescrizione(nuovo.getDescrizione());
+            prod.setMarca(nuovo.getMarca());
+            prod.setModello(nuovo.getModello());
+            prod.setPrezzo(nuovo.getPrezzo());
+            prod.setQuantitaDisponibile(nuovo.getQuantitaDisponibile());
+            prod.setStockMinimo(nuovo.getStockMinimo());
+            return prodottoRepository.save(prod);
+        }).orElseThrow(() -> new RuntimeException("Prodotto non trovato"));
+    }
 
-    public Optional<Prodotto> findById(Long id) { return prodottoRepository.findById(id); }
-
-    public List<Prodotto> findByMarca(String marca) { return prodottoRepository.findByMarcaContainingIgnoreCase(marca); }
+    public void delete(Long id) {
+        prodottoRepository.deleteById(id);
+    }
 }

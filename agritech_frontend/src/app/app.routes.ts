@@ -28,8 +28,6 @@ import { RoleGuard } from './guards/role-guard';
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: HomePage },
-  { path: '**', redirectTo: 'home' },
-
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
 
