@@ -21,6 +21,8 @@ public class Utente {
     private String nome;
     private String cognome;
     private String telefono;
+    private String indirizzo;
+    private String datiFatturazione; // Codice fiscale o P.IVA
 
     // 🔹 Enum coerente con Ruolo.CLIENTE, Ruolo.DIPENDENTE, Ruolo.SOCIO
     @Enumerated(EnumType.STRING)
@@ -49,6 +51,12 @@ public class Utente {
 
     public String getTelefono() { return telefono; }
     public void setTelefono(String telefono) { this.telefono = telefono; }
+
+    public String getIndirizzo() { return indirizzo; }
+    public void setIndirizzo(String indirizzo) { this.indirizzo = indirizzo; }
+
+    public String getDatiFatturazione() { return datiFatturazione; }
+    public void setDatiFatturazione(String datiFatturazione) { this.datiFatturazione = datiFatturazione; }
 
     public Ruolo getRuolo() { return ruolo; }
     public void setRuolo(Ruolo ruolo) { this.ruolo = ruolo; }

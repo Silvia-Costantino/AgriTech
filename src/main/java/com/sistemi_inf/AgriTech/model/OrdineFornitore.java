@@ -19,6 +19,8 @@ public class OrdineFornitore {
     @Enumerated(EnumType.STRING)
     private StatoOrdineFornitore stato = StatoOrdineFornitore.IN_ATTESA;
 
+    private java.math.BigDecimal totale = java.math.BigDecimal.ZERO;
+
     // getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -28,4 +30,6 @@ public class OrdineFornitore {
     public void setDataOrdine(LocalDate dataOrdine) { this.dataOrdine = dataOrdine; }
     public StatoOrdineFornitore getStato() { return stato; }
     public void setStato(StatoOrdineFornitore stato) { this.stato = stato; }
+    public java.math.BigDecimal getTotale() { return totale; }
+    public void setTotale(java.math.BigDecimal totale) { this.totale = totale; }
 }

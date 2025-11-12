@@ -42,13 +42,17 @@ public class AuthService {
         u.setPassword(passwordEncoder.encode(request.getPassword()));
         u.setNome(request.getNome());
         u.setCognome(request.getCognome());
+        u.setTelefono(request.getTelefono());
+        u.setIndirizzo(request.getIndirizzo());
+        u.setDatiFatturazione(request.getDatiFatturazione());
         u.setRuolo(Ruolo.CLIENTE); // ✅ coerente con nuovo enum
         utenteRepository.save(u);
 
         // ✅ Genera token JWT includendo email e ruolo
         String token = jwtUtil.generateToken(u.getEmail());
 
-        return new AuthResponse(token, u.getRuolo().name(), u.getEmail());
+        // ✅ Restituisce AuthResponse con oggetto user completo
+        return new AuthResponse(token, u);
     }
 
     // ─────────────────────────────────────────────
@@ -64,6 +68,7 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(u.getEmail());
 
-        return new AuthResponse(token, u.getRuolo().name(), u.getEmail());
+        // ✅ Restituisce AuthResponse con oggetto user completo per tutti i ruoli
+        return new AuthResponse(token, u);
     }
 }

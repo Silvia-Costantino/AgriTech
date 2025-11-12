@@ -39,10 +39,24 @@ export class AuthService {
   }
 
   login(data: any) {
-    return this.http.post<{ token: string; user: Utente }>(`${this.api}/login`, data).pipe(
+    return this.http.post<{ token: string; user?: { id?: number; email: string; nome?: string; cognome?: string; ruolo: string }; ruolo?: string; email?: string }>(`${this.api}/login`, data).pipe(
       tap(res => {
         this.storage?.setItem(this.tokenKey, res.token);
-        this.userSubject.next(res.user);
+        // ✅ Usa res.user se disponibile, altrimenti costruisce l'oggetto da ruolo ed email
+        const user: Utente = res.user ? {
+          id: res.user.id,
+          email: res.user.email,
+          nome: res.user.nome,
+          cognome: res.user.cognome,
+          ruolo: res.user.ruolo as any
+        } : {
+          id: 0,
+          email: res.email || '',
+          nome: '',
+          cognome: '',
+          ruolo: (res.ruolo as any) || 'CLIENTE'
+        };
+        this.userSubject.next(user);
       })
     );
   }

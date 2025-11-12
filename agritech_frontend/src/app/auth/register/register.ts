@@ -44,6 +44,25 @@ import { AuthService } from '../../services/auth/auth';
             <small class="hint error" *ngIf="submitted && password.errors?.['minlength']">Minimo 6 caratteri.</small>
           </label>
 
+          <label>
+            Indirizzo
+            <input type="text" placeholder="Via Roma 123, Milano" formControlName="indirizzo" required [class.invalid]="submitted && indirizzo.invalid">
+            <small class="hint error" *ngIf="submitted && indirizzo.errors?.['required']">L'indirizzo è obbligatorio.</small>
+          </label>
+
+          <label>
+            Dati di fatturazione
+            <input type="text" placeholder="Codice fiscale o P.IVA" formControlName="datiFatturazione" required [class.invalid]="submitted && datiFatturazione.invalid">
+            <small class="hint error" *ngIf="submitted && datiFatturazione.errors?.['required']">I dati di fatturazione sono obbligatori.</small>
+          </label>
+
+          <label>
+            Numero di telefono
+            <input type="tel" placeholder="Es. +39 333 1234567" formControlName="telefono" required [class.invalid]="submitted && telefono.invalid">
+            <small class="hint error" *ngIf="submitted && telefono.errors?.['required']">Il numero di telefono è obbligatorio.</small>
+            <small class="hint error" *ngIf="submitted && telefono.errors?.['pattern']">Inserisci un numero valido.</small>
+          </label>
+
           <button class="submit" type="submit" [disabled]="form.invalid || loading">
             {{ loading ? 'Creazione…' : 'Crea account' }}
           </button>
@@ -107,12 +126,18 @@ export class RegisterComponent {
     cognome: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
+    indirizzo: ['', Validators.required],
+    datiFatturazione: ['', Validators.required],
+    telefono: ['', [Validators.required, Validators.pattern(/^[0-9+ ]{8,15}$/)]],
   });
 
   get nome() { return this.form.controls.nome; }
   get cognome() { return this.form.controls.cognome; }
   get email() { return this.form.controls.email; }
   get password() { return this.form.controls.password; }
+  get indirizzo() { return this.form.controls.indirizzo; }
+  get datiFatturazione() { return this.form.controls.datiFatturazione; }
+  get telefono() { return this.form.controls.telefono; }
 
   onSubmit() {
     this.submitted = true;
@@ -122,8 +147,14 @@ export class RegisterComponent {
     }
     this.loading = true;
     this.auth.register(this.form.value).subscribe({
-      next: () => { this.loading = false; this.router.navigate(['/login']); },
-      error: () => { this.loading = false; /* puoi mostrare un messaggio */ }
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/login']);
+      },
+      error: () => {
+        this.loading = false;
+        // qui puoi mostrare un messaggio di errore
+      }
     });
   }
 }

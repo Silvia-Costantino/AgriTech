@@ -5,6 +5,7 @@ import com.sistemi_inf.AgriTech.model.Prodotto;
 import com.sistemi_inf.AgriTech.service.ProdottoService;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -26,6 +27,19 @@ public class ProdottoController {
     @GetMapping("/search")
     public List<Prodotto> search(@RequestParam String marca) {
         return prodottoService.searchByMarca(marca);
+    }
+
+    /**
+     * Endpoint per filtri avanzati (marca, prezzo, quantità)
+     */
+    @GetMapping("/filter")
+    public List<Prodotto> filterAdvanced(
+            @RequestParam(required = false) String marca,
+            @RequestParam(required = false) BigDecimal prezzoMin,
+            @RequestParam(required = false) BigDecimal prezzoMax,
+            @RequestParam(required = false) Integer quantitaMin,
+            @RequestParam(required = false) Integer quantitaMax) {
+        return prodottoService.filterAdvanced(marca, prezzoMin, prezzoMax, quantitaMin, quantitaMax);
     }
 
     @PostMapping

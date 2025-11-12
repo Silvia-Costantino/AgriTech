@@ -21,9 +21,19 @@ public class OrdineFornitoreController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_SHOWROOM','ROLE_SOCIO')")
-    public ResponseEntity<OrdineFornitore> create(@RequestBody OrdineFornitore ordine, @RequestBody List<OrdineFornitoreItem> items) {
-        OrdineFornitore saved = ordineFornitoreService.create(ordine, items);
+    public ResponseEntity<OrdineFornitore> create(@RequestBody CreateOrdineFornitoreRequest request) {
+        OrdineFornitore saved = ordineFornitoreService.create(request.getOrdine(), request.getItems());
         return ResponseEntity.ok(saved);
+    }
+
+    // DTO per la richiesta
+    public static class CreateOrdineFornitoreRequest {
+        private OrdineFornitore ordine;
+        private List<OrdineFornitoreItem> items;
+
+        public OrdineFornitore getOrdine() { return ordine; }
+        public void setOrdine(OrdineFornitore ordine) { this.ordine = ordine; }
+        public List<OrdineFornitoreItem> getItems() { return items; }
+        public void setItems(List<OrdineFornitoreItem> items) { this.items = items; }
     }
 }

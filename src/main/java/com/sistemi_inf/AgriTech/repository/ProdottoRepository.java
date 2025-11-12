@@ -3,9 +3,12 @@ package com.sistemi_inf.AgriTech.repository;
 
 import com.sistemi_inf.AgriTech.model.Prodotto;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProdottoRepository extends JpaRepository<Prodotto, Long> {
     List<Prodotto> findByMarcaContainingIgnoreCase(String marca);
-    List<Prodotto> findByPrezzoBetween(java.math.BigDecimal min, java.math.BigDecimal max);
+    List<Prodotto> findByPrezzoBetween(BigDecimal min, BigDecimal max);
+    List<Prodotto> findByQuantitaDisponibileGreaterThanEqual(Integer quantita);
+    List<Prodotto> findByQuantitaDisponibileBetween(Integer min, Integer max);
 }
