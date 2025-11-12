@@ -13,7 +13,7 @@ import { Subscription } from 'rxjs';
     <nav class="navbar" *ngIf="showNavbar">
       <div class="nav-left">
         <a routerLink="/home" class="brand">
-          <span class="icon">🚜</span>
+          <span class="icon">&#128668;</span>
           <div class="brand-text">
             <strong>AgriTech</strong>
             <small>Trattori e Soluzioni</small>
@@ -23,11 +23,13 @@ import { Subscription } from 'rxjs';
         <div class="nav-links" *ngIf="isLogged">
           <a routerLink="/catalogo">Catalogo</a>
           <a routerLink="/carrello" *ngIf="role==='CLIENTE'">Carrello</a>
-          <a routerLink="/ordini" *ngIf="role==='CLIENTE' || role==='DIPENDENTE' || role==='SOCIO'">Ordini</a>
+          <a routerLink="/ordini/storico" *ngIf="role==='CLIENTE'">Storico ordini</a>
+          <a routerLink="/profilo" *ngIf="role==='CLIENTE'">Account CLIENTE</a>
+          <a routerLink="/ordini" *ngIf="role==='DIPENDENTE' || role==='SOCIO'">Ordini</a>
           <a routerLink="/officina" *ngIf="role==='DIPENDENTE' || role==='SOCIO'">Officina</a>
-          <a routerLink="/fornitori" *ngIf="role==='SOCIO'">Fornitori</a>
+          <a routerLink="/clienti-preventivi" *ngIf="role==='SOCIO'">Clienti e Preventivi</a>
           <a routerLink="/dipendenti" *ngIf="role==='SOCIO'">Dipendenti</a>
-          <a routerLink="/contabilita" *ngIf="role==='SOCIO'">Contabilità</a>
+          <a routerLink="/contabilita" *ngIf="role==='SOCIO'">Contabilit�</a>
         </div>
       </div>
 
@@ -105,3 +107,5 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
   }
 }
+
+

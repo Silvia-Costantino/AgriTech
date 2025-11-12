@@ -1,7 +1,6 @@
-// src/app/pages/carrello/carrello.ts
+﻿// src/app/pages/carrello/carrello.ts
 import { Component, OnInit, inject } from '@angular/core';
-import { NavbarComponent } from '../../components/navbar/navbar';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CarrelloService } from '../../services/carrello/carrello';
 import { Router } from '@angular/router';
@@ -28,16 +27,14 @@ interface Carrello {
 @Component({
   selector: 'app-carrello',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, FormsModule],
+  imports: [CommonModule, FormsModule],
   template: `
-    <app-navbar></app-navbar>
     <div class="carrello-container">
       <div class="header">
-        <h2>🛒 Il tuo carrello</h2>
+        <h2>Il tuo carrello</h2>
         <button *ngIf="carrello?.items?.length"
                 (click)="svuota()"
-                class="btn-svuota">
-          🗑️ Svuota carrello
+                class="btn-svuota">Svuota carrello
         </button>
       </div>
 
@@ -45,7 +42,7 @@ interface Carrello {
       <div *ngIf="error" class="error">{{ error }}</div>
 
       <div *ngIf="!loading && carrello && (!carrello.items || carrello.items.length === 0)" class="empty">
-        <p>Il tuo carrello è vuoto</p>
+        <p>Il tuo carrello &egrave; vuoto</p>
         <button (click)="vaiAlCatalogo()" class="btn-primary">Vai al catalogo</button>
       </div>
 
@@ -55,7 +52,7 @@ interface Carrello {
           <tr>
             <th>Prodotto</th>
             <th>Prezzo unitario</th>
-            <th>Quantità</th>
+            <th>Quantit&agrave;</th>
             <th>Totale</th>
             <th>Azioni</th>
           </tr>
@@ -89,7 +86,7 @@ interface Carrello {
             <td class="azioni">
               <button (click)="rimuovi(item.prodotto.id)"
                       [disabled]="updating"
-                      class="btn-rimuovi">🗑️</button>
+                      class="btn-rimuovi">Rimuovi</button>
             </td>
           </tr>
           </tbody>
@@ -110,7 +107,6 @@ export class CarrelloPage implements OnInit {
   private carrelloService = inject(CarrelloService);
   private router = inject(Router);
   private http = inject(HttpClient);
-  private currencyPipe = inject(CurrencyPipe);
 
   carrello: Carrello | null = null;
   loading = false;
@@ -160,7 +156,7 @@ export class CarrelloPage implements OnInit {
     }
     if (nuovaQuantita > item.prodotto.quantitaDisponibile) {
       input.value = item.quantita.toString();
-      alert(`Quantità massima disponibile: ${item.prodotto.quantitaDisponibile}`);
+      alert(`Quantit&agrave; massima disponibile: ${item.prodotto.quantitaDisponibile}`);
       return;
     }
     this.aggiornaQuantita(item.prodotto.id, nuovaQuantita);
@@ -229,14 +225,14 @@ export class CarrelloPage implements OnInit {
       return;
     }
 
-    const totaleFormattato = this.currencyPipe.transform(this.totaleCarrello, 'EUR');
+    const totaleFormattato = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(this.totaleCarrello);
     if (!confirm(`Confermi l'ordine per un totale di ${totaleFormattato}?`)) return;
 
     this.updating = true;
     this.http.post(`http://localhost:8080/api/ordini/from-carrello/${this.carrello.id}`, {}).subscribe({
       next: () => {
-        alert('✅ Ordine creato con successo!');
-        this.router.navigate(['/ordini']);
+        alert('Ordine creato con successo!');
+        this.router.navigate(['/ordini/storico']);
       },
       error: (err) => {
         this.error = err?.error?.message || 'Errore nella creazione dell\'ordine';

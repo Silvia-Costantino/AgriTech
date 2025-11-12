@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { NavbarComponent } from '../../components/navbar/navbar';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth/auth';
 
 @Component({
   selector: 'app-home',
@@ -40,7 +41,7 @@ import { CommonModule } from '@angular/common';
       <article>
         <h3>Gestione ordini</h3>
         <p>Monitora forniture, consegne e magazzino con un’unica piattaforma intuitiva.</p>
-        <a routerLink="/ordini" class="link">Gestisci ordini</a>
+        <a [routerLink]="ordiniLink" class="link">{{ ordiniText }}</a>
       </article>
       <article>
         <h3>Assistenza officina</h3>
@@ -186,4 +187,32 @@ import { CommonModule } from '@angular/common';
     .link:hover { text-decoration: underline; }
   `]
 })
-export class HomePage {}
+export class HomePage implements OnInit, OnDestroy {
+  private auth = inject(AuthService);
+
+  ordiniLink: string = '/ordini';
+  ordiniText: string = 'Gestisci ordini';
+  private sub?: any;
+
+  ngOnInit() {
+    const update = () => {
+      const role = this.auth.getRole();
+      if (role === 'CLIENTE') {
+        this.ordiniLink = '/ordini/storico';
+        this.ordiniText = 'Storico ordini';
+      } else if (role === 'SOCIO' || role === 'DIPENDENTE') {
+        this.ordiniLink = '/ordini';
+        this.ordiniText = 'Gestisci ordini';
+      } else {
+        this.ordiniLink = '/login';
+        this.ordiniText = 'Accedi per gestire ordini';
+      }
+    };
+    update();
+    this.sub = this.auth.user$.subscribe(() => update());
+  }
+
+  ngOnDestroy() {
+    this.sub?.unsubscribe?.();
+  }
+}

@@ -2,12 +2,10 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DipendentiService } from '../../services/dipendenti/dipendenti';
 import { BustaPaga } from '../../models/dipendenti';
-import { NavbarComponent } from '../../components/navbar/navbar';
 
 @Component({
-  standalone: true, selector: 'app-buste-paga', imports: [CommonModule, NavbarComponent],
+  standalone: true, selector: 'app-buste-paga', imports: [CommonModule],
   template: `
-  <app-navbar></app-navbar>
   <div class="container">
     <h2>Buste paga</h2>
     <table class="table">

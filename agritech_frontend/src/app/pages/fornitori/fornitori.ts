@@ -1,15 +1,13 @@
-import { Component, OnInit, inject } from '@angular/core';
+﻿import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FornitoriService } from '../../services/fornitori/fornitori';
 import { Fornitore } from '../../models/fornitore';
-import { NavbarComponent } from '../../components/navbar/navbar';
 
 @Component({
   standalone: true, selector: 'app-fornitori',
-  imports: [CommonModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, FormsModule],
   template: `
-  <app-navbar></app-navbar>
   <div class="container">
     <h2>Rubrica Fornitori</h2>
 

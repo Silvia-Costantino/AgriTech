@@ -18,6 +18,7 @@ export class AuthService {
 
   private readonly api = 'http://localhost:8080/api/auth';
   private readonly tokenKey = 'jwt_agritech';
+  private readonly roleKey = 'role_agritech';
 
   private get storage() {
     return isPlatformBrowser(this.platformId) ? globalThis.localStorage : null;
@@ -42,6 +43,10 @@ export class AuthService {
     return this.http.post<{ token: string; user?: { id?: number; email: string; nome?: string; cognome?: string; ruolo: string }; ruolo?: string; email?: string }>(`${this.api}/login`, data).pipe(
       tap(res => {
         this.storage?.setItem(this.tokenKey, res.token);
+        const roleFromResponse = res.user?.ruolo ?? (res.ruolo as any);
+        if (roleFromResponse) {
+          this.storage?.setItem(this.roleKey, roleFromResponse);
+        }
         // ✅ Usa res.user se disponibile, altrimenti costruisce l'oggetto da ruolo ed email
         const user: Utente = res.user ? {
           id: res.user.id,
@@ -67,6 +72,7 @@ export class AuthService {
 
   logout() {
     this.storage?.removeItem(this.tokenKey);
+    this.storage?.removeItem(this.roleKey);
     this.userSubject.next(null);
     this.router.navigate(['/login']);
   }
@@ -89,6 +95,9 @@ export class AuthService {
   }
 
   getRole(): 'SOCIO' | 'DIPENDENTE' | 'CLIENTE' | null {
+    const storedRole = this.storage?.getItem(this.roleKey) as 'SOCIO' | 'DIPENDENTE' | 'CLIENTE' | null | undefined;
+    if (storedRole) return storedRole;
+
     const t = this.getToken();
     if (!t) return null;
     const payload = this.parseJwt(t);

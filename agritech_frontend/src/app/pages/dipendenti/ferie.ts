@@ -2,12 +2,10 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DipendentiService } from '../../services/dipendenti/dipendenti';
 import { FeriePermessi } from '../../models/dipendenti';
-import { NavbarComponent } from '../../components/navbar/navbar';
 
 @Component({
-  standalone: true, selector: 'app-ferie', imports: [CommonModule, NavbarComponent],
+  standalone: true, selector: 'app-ferie', imports: [CommonModule],
   template: `
-  <app-navbar></app-navbar>
   <div class="container">
     <h2>Ferie & Permessi</h2>
     <table class="table">

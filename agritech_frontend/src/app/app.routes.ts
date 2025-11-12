@@ -4,6 +4,7 @@ import { Routes } from '@angular/router';
 import { HomePage } from './pages/home/home';
 import { CatalogoPage } from './pages/catalogo/catalogo';
 import { OrdiniPage } from './pages/ordini/ordini';
+import { StoricoOrdiniPage } from './pages/ordini/storico';
 import { CarrelloPage } from './pages/carrello/carrello';
 import { ProfiloPage } from './pages/profilo/profilo';
 
@@ -16,7 +17,7 @@ import { DipendentiPage } from './pages/dipendenti/dipendenti';
 import { TurniPage } from './pages/dipendenti/turni';
 import { FeriePage } from './pages/dipendenti/ferie';
 import { BustePagaPage } from './pages/dipendenti/buste-paga';
-import { FornitoriPage } from './pages/fornitori/fornitori';
+import { ClientiPreventiviPage } from './pages/crm/clienti-preventivi';
 import { ContabilitaPage } from './pages/contabilita/contabilita';
 import { OfficinaPage } from './pages/officina/officina';
 import { RicambiPage } from './pages/officina/ricambi';
@@ -33,6 +34,7 @@ export const routes: Routes = [
 
   { path: 'catalogo', component: CatalogoPage, canActivate: [AuthGuard] },
   { path: 'ordini', component: OrdiniPage, canActivate: [AuthGuard, RoleGuard], data: { roles: ['SOCIO', 'DIPENDENTE'] } },
+  { path: 'ordini/storico', component: StoricoOrdiniPage, canActivate: [AuthGuard, RoleGuard], data: { roles: ['CLIENTE'] } },
 
   // Area Cliente
   { path: 'carrello', component: CarrelloPage, canActivate: [AuthGuard, RoleGuard], data: { roles: ['CLIENTE'] } },
@@ -44,7 +46,7 @@ export const routes: Routes = [
   { path: 'dipendenti/ferie', component: FeriePage, canActivate: [AuthGuard, RoleGuard], data: { roles: ['SOCIO'] } },
   { path: 'dipendenti/buste-paga', component: BustePagaPage, canActivate: [AuthGuard, RoleGuard], data: { roles: ['SOCIO'] } },
 
-  { path: 'fornitori', component: FornitoriPage, canActivate: [AuthGuard, RoleGuard], data: { roles: ['SOCIO'] } },
+  { path: 'clienti-preventivi', component: ClientiPreventiviPage, canActivate: [AuthGuard, RoleGuard], data: { roles: ['SOCIO'] } },
   { path: 'contabilita', component: ContabilitaPage, canActivate: [AuthGuard, RoleGuard], data: { roles: ['SOCIO'] } },
 
   { path: 'officina', component: OfficinaPage, canActivate: [AuthGuard, RoleGuard], data: { roles: ['SOCIO', 'DIPENDENTE'] } },
@@ -53,3 +55,5 @@ export const routes: Routes = [
   // Fallback
   { path: '**', redirectTo: 'home' }
 ];
+
+

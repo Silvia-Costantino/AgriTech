@@ -1,0 +1,134 @@
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { CrmService, ClienteDTO, PreventivoDTO } from '../../services/crm/crm';
+
+@Component({
+  standalone: true,
+  selector: 'app-clienti-preventivi',
+  imports: [CommonModule, FormsModule],
+  template: `
+    <div class="crm-container">
+      <h2>Clienti e Preventivi</h2>
+
+      <div class="table-container">
+        <h3 class="section-title">Clienti</h3>
+        <div class="form-inline">
+          <input [(ngModel)]="q" placeholder="Cerca per nome, cognome o email" />
+          <button class="btn-secondary" (click)="search()">Cerca</button>
+          <button class="btn-secondary" (click)="reset()">Reset</button>
+        </div>
+        <table class="table">
+          <thead>
+            <tr><th>ID</th><th>Nome</th><th>Cognome</th><th>Email</th><th>Telefono</th><th>Indirizzo</th><th>Azioni</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of clienti">
+              <td>{{c.id}}</td>
+              <td><input [(ngModel)]="c.nome" /></td>
+              <td><input [(ngModel)]="c.cognome" /></td>
+              <td><input [(ngModel)]="c.email" /></td>
+              <td><input [(ngModel)]="c.telefono" /></td>
+              <td><input [(ngModel)]="c.indirizzo" /></td>
+              <td class="actions">
+                <button class="btn-primary" (click)="saveCliente(c)">Salva</button>
+                <button class="btn-secondary danger" (click)="deleteCliente(c)">Elimina</button>
+                <button class="btn-secondary" (click)="loadPreventiviCliente(c)">Vedi preventivi</button>
+              </td>
+            </tr>
+            <tr *ngIf="clienti.length===0"><td colspan="7">Nessun cliente</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-container mt">
+        <h3 class="section-title">Preventivi</h3>
+        <form class="form-inline" (ngSubmit)="crea()">
+          <select [(ngModel)]="form.clienteId" name="cli" required>
+            <option [ngValue]="null">Seleziona cliente</option>
+            <option *ngFor="let c of clienti" [ngValue]="c.id">{{c.nome}} {{c.cognome}} ({{c.email}})</option>
+          </select>
+          <input [(ngModel)]="form.modello" name="modello" placeholder="Modello/Descrizione" required />
+          <input [(ngModel)]="form.prezzo" name="prezzo" type="number" step="0.01" placeholder="Prezzo" required />
+          <input [(ngModel)]="form.sconto" name="sconto" type="number" step="0.01" placeholder="Sconto" />
+          <input [(ngModel)]="form.validita" name="validita" type="date" required />
+          <button class="btn-primary" type="submit">Crea</button>
+        </form>
+
+        <table class="table">
+          <thead>
+          <tr><th>ID</th><th>Cliente</th><th>Modello</th><th>Prezzo</th><th>Sconto</th><th>Totale netto</th><th>Validita </th><th>Stato</th><th>Azioni</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of preventivi">
+              <td>{{p.id}}</td>
+              <td>{{p.cliente?.nome}} {{p.cliente?.cognome}} ({{p.cliente?.email}})</td>
+              <td>{{p.modello}}</td>
+              <td>{{p.prezzo | currency:'EUR'}}</td>
+              <td>{{p.sconto | currency:'EUR'}}</td>
+              <td>{{ (p.prezzo - (p.sconto || 0)) | currency:'EUR' }}</td>
+              <td>{{p.validita}}</td>
+              <td><span class="badge" [class.approvato]="p.stato==='APPROVATO'" [class.rifiutato]="p.stato==='RIFIUTATO'">{{p.stato}}</span></td>
+              <td class="actions">
+                <button class="btn-primary" (click)="approva(p)" [disabled]="p.stato==='APPROVATO'">Approva</button>
+                <button class="btn-secondary" (click)="rifiuta(p)" [disabled]="p.stato==='RIFIUTATO'">Rifiuta</button>
+                <button class="btn-success" (click)="converti(p)" [disabled]="p.stato==='RIFIUTATO' || p.stato==='CONVERTITO'">Converti in ordine</button>
+              </td>
+            </tr>
+            <tr *ngIf="preventivi.length===0"><td colspan="9">Nessun preventivo</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .crm-container { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+    h2 { margin:0 0 1rem 0; color:#0e3f25; font-size: 2rem; }
+    .table-container { background:#fff; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); overflow-x:auto; }
+    .section-title { margin: .75rem 1rem; color:#1f6c2e; }
+    .mt { margin-top:1rem; }
+    table { width:100%; border-collapse: collapse; }
+    thead { background: linear-gradient(110deg, #0e3f25 0%, #1f6c2e 55%, #2e9d37 100%); color:#fff; }
+    th, td { padding:.75rem; border-bottom:1px solid #e0e0e0; text-align:left; vertical-align: middle; }
+    .actions { display:flex; gap:.5rem; align-items:center; }
+    .btn-primary { background:#2e9d37; color:#fff; border:none; padding:.45rem .9rem; border-radius:6px; cursor:pointer; }
+    .btn-secondary { background:#fff; color:#1f6c2e; border:1px solid #1f6c2e; padding:.4rem .8rem; border-radius:6px; cursor:pointer; }
+    .btn-success { background:#1f6c2e; color:#fff; border:none; padding:.45rem .9rem; border-radius:6px; cursor:pointer; }
+    .btn-secondary.danger { border-color:#b00020; color:#b00020; }
+    .form-inline { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; padding: .75rem; }
+    .form-inline input, .form-inline select { padding:.5rem; border:1px solid #ddd; border-radius:6px; }
+    .badge { margin-left: .4rem; font-size: .8rem; padding: .1rem .4rem; border-radius: .4rem; background:#eee; }
+    .badge.approvato { background:#e8f5e9; color:#1b5e20; }
+    .badge.rifiutato { background:#ffebee; color:#b71c1c; }
+  `]
+})
+export class ClientiPreventiviPage implements OnInit {
+  private svc = inject(CrmService);
+  clienti: ClienteDTO[] = [];
+  preventivi: PreventivoDTO[] = [];
+  q = '';
+  form: { clienteId: number | null; modello: string; prezzo: number | null; sconto: number | null; validita: string } = { clienteId: null, modello: '', prezzo: null, sconto: null, validita: new Date().toISOString().slice(0,10) };
+
+  ngOnInit(){
+    this.loadClienti();
+    this.loadPreventivi();
+  }
+  loadClienti(){ this.svc.clienti().subscribe(cs => this.clienti = cs); }
+  loadPreventivi(){ this.svc.preventivi().subscribe(ps => this.preventivi = ps); }
+  search(){ this.svc.clienti(this.q).subscribe(cs => this.clienti = cs); }
+  reset(){ this.q = ''; this.loadClienti(); }
+  saveCliente(c: ClienteDTO){ this.svc.updateCliente(c.id, c).subscribe(cc => Object.assign(c, cc)); }
+  deleteCliente(c: ClienteDTO){ if (!confirm('Eliminare il cliente?')) return; this.svc.deleteCliente(c.id).subscribe(() => this.loadClienti()); }
+  loadPreventiviCliente(c: ClienteDTO){ this.svc.preventiviCliente(c.id).subscribe(ps => this.preventivi = ps); }
+  crea(){
+    if (!this.form.clienteId || !this.form.modello || !this.form.prezzo) return;
+    const payload = { clienteId: this.form.clienteId, modello: this.form.modello, prezzo: this.form.prezzo!, sconto: this.form.sconto || 0, validita: this.form.validita };
+    this.svc.creaPreventivo(payload).subscribe(_ => { this.form = { clienteId: null, modello: '', prezzo: null, sconto: null, validita: new Date().toISOString().slice(0,10) }; this.loadPreventivi(); });
+  }
+  approva(p: PreventivoDTO){ this.svc.approvaPreventivo(p.id).subscribe(pp => Object.assign(p, pp)); }
+  rifiuta(p: PreventivoDTO){ this.svc.rifiutaPreventivo(p.id).subscribe(pp => Object.assign(p, pp)); }
+  converti(p: PreventivoDTO){ this.svc.convertiPreventivo(p.id).subscribe(res => { alert(res.message + ' (Ordine #' + res.ordineId + ')'); this.loadPreventivi(); }); }
+}
+
+
+

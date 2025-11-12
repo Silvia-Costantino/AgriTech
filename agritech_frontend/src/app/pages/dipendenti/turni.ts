@@ -2,12 +2,10 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DipendentiService } from '../../services/dipendenti/dipendenti';
 import { Turno } from '../../models/dipendenti';
-import { NavbarComponent } from '../../components/navbar/navbar';
 
 @Component({
-  standalone: true, selector: 'app-turni', imports: [CommonModule, NavbarComponent],
+  standalone: true, selector: 'app-turni', imports: [CommonModule],
   template: `
-  <app-navbar></app-navbar>
   <div class="container">
     <h2>Turni</h2>
     <table class="table">
