@@ -1,4 +1,3 @@
-// src/main/java/com/sistemi_inf/AgriTech/model/Prodotto.java
 package com.sistemi_inf.AgriTech.model;
 
 import jakarta.persistence.*;
